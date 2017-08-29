@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>英语听力</title>
+	<style>
+		html{height: 100%;}
+		body{height: 90%}
+		textarea{
+			display: block; 
+			height: 50%; 
+			width: 50%;
+			padding-left: 20px;
+			margin: 30px auto;
+			font-size: 20px;
+		}
+		.inputBox{
+			height: 75px;
+			width: 100%;
+			margin: 0 auto;
+			text-align: center;
+		}
+		input{width: 150px; height: 50px; font-size: 20px;}
+		p{margin-top: 0; margin-bottom: 5px;}
+		.divstyle{
+			width: 60%;
+			margin:0 auto;
+		}
+		.inputnub{
+			height: 25px;
+			text-align: center;
+			font-size: 16px;
+			margin-bottom: 5px;
+		}
+		#J-pushBtn,
+		#J-playBtn{
+			position: relative;
+			top: -12px;
+		}
+	</style>
+</head>
+<body>
+	<textarea id="J-pushWord"></textarea>
+	<div class="inputBox">
+		<div style="display: inline-block; width: 155px">
+			<input id="J-speed" class="inputnub" type="text" placeholder="播放频率，按秒计算">
+			<input id="J-playspeed" class="inputnub" type="text" placeholder="语速  范围0.1-10">
+		</div>
+		<input id="J-pushBtn" type="button" value="添加">
+		<input id="J-playBtn" type="button" value="播放" disabled>
+	</div>
+	<div id="J-show" class="divstyle"></div>
+
+
+
+	<script>
+		var enterBtn = document.querySelector("#J-pushBtn");
+		var playBtn = document.querySelector("#J-playBtn");
+		var words = "";
+
+
+		enterBtn.onclick = function(){
+			words = document.querySelector("#J-pushWord").value;
+			words = trim(words);  /* 去掉前后空格 */
+
+			if (words=="") {
+				var showDiv = document.querySelector("#J-show");
+				showDiv.innerHTML = "";
+				var playBtn = document.querySelector("#J-playBtn");
+				playBtn.setAttribute("disabled",true);
+			}else{
+				words = words.split("\n");
+				showWord(words);
+			}
+		}
+
+		playBtn.onclick = function(){
+			speak(words)
+		}
+
+
+
+		/**
+		 * 去掉空格
+		 * @param  {[String]} str [需要去掉空格的字符串]
+		 * @return {[String]}     
+		 */
+		function trim(str){
+			return str.replace(/(^\s+)|(\s+$)/g, "");
+		}
+
+
+		/**
+		 * 显示单词
+		 * @param  {[Array]} obj [写入的单词]
+		 */
+		function showWord(obj){
+			var showDiv = document.querySelector("#J-show");
+			showDiv.innerHTML = "";
+			for(var i = 0; i < obj.length; i++){
+				var ptag = document.createElement("p");
+				ptag.append(i+1 +". "+obj[i])
+				showDiv.append(ptag);
+			}
+			var playBtn = document.querySelector("#J-playBtn");
+			playBtn.removeAttribute("disabled");
+		}
+
+
+		/**
+		 * 播放听力
+		 * @param  {[Array]} obj [需要听写的部分]
+		 */
+		function speak(obj){
+			var i = 0;
+			var volume = 1;  		//音量  0-1     默认1
+			var rate = 1;       //语速  0.1-10  默认1
+			var pitch = 1;      //音高  0-2     默认1
+			var lang = "en-US"  //语言
+			var speed = null;   //听写频率
+
+
+			var getSpeed = document.querySelector("#J-speed").value;
+			if (getSpeed != "" || getSpeed != null) {
+				speed = getSpeed*1000;
+			}else{
+				speed = 5000;
+			}
+
+			var getplaySpeed = document.querySelector("#J-playspeed").value;
+			if (getplaySpeed != "" || getplaySpeed != null) {
+				rate = getplaySpeed;
+			}else{
+				rate = 1;
+			}
+
+
+			var timer = setInterval(function(){    //开启定时器
+        
+
+        var tts = new window.SpeechSynthesisUtterance();
+        if (obj[i]!=undefined) {
+        	tts.text = obj[i];
+        	tts.volume = volume;
+        	tts.rate = rate;
+        	tts.pitch = pitch;
+        	tts.lang = lang;
+
+
+        	window.speechSynthesis.speak(tts);
+        }
+
+
+        if(i == obj.length)
+        {    
+          clearInterval(timer);    //清除定时器
+        }
+        i++;
+	    },speed);			
+		}
+
+
+
+	</script>
+</body>
+</html>
